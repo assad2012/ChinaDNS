@@ -29,6 +29,9 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#include <sys/param.h>
+
+#include "local_ns_parser.h"
 
 #include "config.h"
 
@@ -238,9 +241,6 @@ static int setnonblock(int sock) {
 
 static int parse_args(int argc, char **argv) {
   int ch;
-  dns_servers = strdup(default_dns_servers);
-  listen_addr = strdup(default_listen_addr);
-  listen_port = strdup(default_listen_port);
   while ((ch = getopt(argc, argv, "hb:p:s:l:c:y:dmvV")) != -1) {
     switch (ch) {
       case 'h':
@@ -280,6 +280,15 @@ static int parse_args(int argc, char **argv) {
         usage();
         exit(1);
     }
+  }
+  if (dns_servers == NULL) {
+    dns_servers = strdup(default_dns_servers);
+  }
+  if (listen_addr == NULL) {
+    listen_addr = strdup(default_listen_addr);
+  }
+  if (listen_port == NULL) {
+    listen_port = strdup(default_listen_port);
   }
   argc -= optind;
   argv += optind;
@@ -564,8 +573,8 @@ static void dns_handle_local() {
   ns_msg msg;
   len = recvfrom(local_sock, global_buf, BUF_SIZE, 0, src_addr, &src_addrlen);
   if (len > 0) {
-    if (ns_initparse((const u_char *)global_buf, len, &msg) < 0) {
-      ERR("ns_initparse");
+    if (local_ns_initparse((const u_char *)global_buf, len, &msg) < 0) {
+      ERR("local_ns_initparse");
       free(src_addr);
       return;
     }
@@ -652,8 +661,8 @@ static void dns_handle_remote() {
   ns_msg msg;
   len = recvfrom(remote_sock, global_buf, BUF_SIZE, 0, src_addr, &src_len);
   if (len > 0) {
-    if (ns_initparse((const u_char *)global_buf, len, &msg) < 0) {
-      ERR("ns_initparse");
+    if (local_ns_initparse((const u_char *)global_buf, len, &msg) < 0) {
+      ERR("local_ns_initparse");
       free(src_addr);
       return;
     }
@@ -724,8 +733,8 @@ static const char *hostname_from_question(ns_msg msg) {
   if (rrmax == 0)
     return NULL;
   for (rrnum = 0; rrnum < rrmax; rrnum++) {
-    if (ns_parserr(&msg, ns_s_qd, rrnum, &rr)) {
-      ERR("ns_parserr");
+    if (local_ns_parserr(&msg, ns_s_qd, rrnum, &rr)) {
+      ERR("local_ns_parserr");
       return NULL;
     }
     result = ns_rr_name(rr);
@@ -764,8 +773,8 @@ static int should_filter_query(ns_msg msg, struct in_addr dns_addr) {
     return -1;
   }
   for (rrnum = 0; rrnum < rrmax; rrnum++) {
-    if (ns_parserr(&msg, ns_s_an, rrnum, &rr)) {
-      ERR("ns_parserr");
+    if (local_ns_parserr(&msg, ns_s_an, rrnum, &rr)) {
+      ERR("local_ns_parserr");
       return 0;
     }
     u_int type;
@@ -893,7 +902,7 @@ Forward DNS requests.\n\
                         if not specified, CHNRoute will be turned\n\
   -d                    off enable bi-directional CHNRoute filter\n\
   -y                    delay time for suspects, default: 0.3\n\
-  -b BIND_ADDR          address that listens, default: 127.0.0.1\n\
+  -b BIND_ADDR          address that listens, default: 0.0.0.0\n\
   -p BIND_PORT          port that listens, default: 53\n\
   -s DNS                DNS servers to use, default:\n\
                         114.114.114.114,208.67.222.222:443,8.8.8.8\n\

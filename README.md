@@ -4,9 +4,19 @@ ChinaDNS
 [![Build Status]][Travis CI]
 [![Coverage Status]][Coverage]
 
-Protect yourself against DNS poisoning in China.
+Traditional way to bypass DNS poisoning is to send all queries to
+a foreign DNS server via VPN. However some Chinese websites will get
+bad results if they have CDNs outside the country.
 
-In order to bypass IP blocking, you also need VPN software like [ShadowVPN].
+The second way is to maintain a list of domains of which you want to
+resolve from local DNS or foreign DNS. This list changes too often,
+taking too much effort to maintain.
+
+ChinaDNS automatically queries local DNS servers to resolve Chinese domains
+and queries foreign DNS servers to resolve foreign domains. It is smart
+enough to work only with a Chinese IP range file, which doesn't change often.
+
+In order to bypass IP blocking, you SHOULD use VPN software like [ShadowVPN].
 
 Install
 -------
@@ -163,9 +173,9 @@ Mailing list: http://groups.google.com/group/shadowsocks
 [ChinaDNS]:             https://github.com/clowwindy/ChinaDNS
 [Coverage Status]:      https://jenkins.shadowvpn.org/result/chinadns
 [Coverage]:             https://jenkins.shadowvpn.org/job/ChinaDNS/ws/src/index.html
-[Download]:             https://sourceforge.net/projects/chinadns/files/dist/
+[Download]:             https://github.com/clowwindy/ChinaDNS/releases
 [Issue Tracker]:        https://github.com/clowwindy/ChinaDNS/issues?state=open
-[Download precompiled]: https://sourceforge.net/projects/chinadns/files/dist/
+[Download precompiled]: https://github.com/clowwindy/ChinaDNS/releases
 [Download a release]:   https://github.com/clowwindy/ChinaDNS/releases
 [SDK]:                  http://wiki.openwrt.org/doc/howto/obtain.firmware.sdk
 [ShadowVPN]:            https://github.com/clowwindy/ShadowVPN
